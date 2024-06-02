@@ -46,6 +46,15 @@ class AssemblerPanel(wx.Panel):
 
         # EVENT HANDLING
         self.Bind(wx.EVT_BUTTON, self.button_handler)
+        self.Bind(wx.EVT_FILEPICKER_CHANGED, self.file_picker_changed_handler)
+
+    def file_picker_changed_handler(self, event):
+        self.notebook_assembler.ChangeSelection(0)
+        assembly_program_file_path = self.control_panel.get_file_path()
+        self.tab_assembler_status.load_assembly_program_file(assembly_program_file_path)
+        self.tab_assembly_listing.clear_assembly_listing()
+        self.tab_object_code.clear_object_code()
+        self.control_panel.enable_assemble_button()
 
     def notebook_tab_handler(self, event):
         tab = event.GetEventObject()
@@ -55,10 +64,6 @@ class AssemblerPanel(wx.Panel):
                 event.Veto()
 
     def button_handler(self, event):
-        self.notebook_assembler.ChangeSelection(0)
-        # Clear Assembly Status tab
-        self.tab_assembler_status.clear_assembly_status()
-
         try:
             # Get complete file path from the assembler control panel file picker control
             program_file_path = self.control_panel.get_file_path()
@@ -82,6 +87,4 @@ class AssemblerPanel(wx.Panel):
             # ERROR
             print_error(str(ex))
             self.tab_assembler_status.set_assembly_status(str(ex), assembly_error=True)
-
-        # wx.MessageBox(message=file_path, caption="File Path", style=wx.OK | wx.ICON_INFORMATION)
 

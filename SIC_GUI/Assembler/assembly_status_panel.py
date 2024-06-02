@@ -32,7 +32,9 @@ class AssemblyStatusPanel(wx.Panel):
 
         self.txt_assembly_status.AppendText(assembly_status)
 
-    def clear_assembly_status(self):
-        self.txt_assembly_status.Clear()
+    def load_assembly_program_file(self, assembly_program_file_path):
+        self.txt_assembly_status.LoadFile(assembly_program_file_path)
+        self.txt_assembly_status.AppendText("\nAssembly Program File Ready\n")
+        self.txt_assembly_status.AppendText("Click the Assemble button to generate assembly listing and object code\n")
 
 
