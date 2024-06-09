@@ -1,5 +1,3 @@
-import random
-
 from SIC_Peripherals.sic_input_device_F1 import read_byte_input_device_F1, test_input_device_F1
 from SIC_Peripherals.sic_output_device_05 import test_output_device_05, write_byte_to_output_device_05
 from SIC_Simulator.sic_memory_model import SICMemoryModelError
@@ -9,7 +7,6 @@ from SIC_Utilities.sic_constants import HEX_TO_OPCODE_DICT, BYTES_IN_WORD, \
     FROM_INDEXED_ADDRESSING_DICT, MINIMUM_MEMORY_ADDRESS_DEC, MAXIMUM_MEMORY_ADDRESS_DEC, MAXIMUM_INTEGER, \
     MINIMUM_INTEGER, SW_LESS_THAN, SW_EQUAL, SW_GREATER_THAN, BITS_IN_WORD
 from SIC_Utilities.sic_converter import hex_string_to_dec, dec_to_hex_string, hex_word_to_bin_word
-from SIC_Utilities.sic_messaging import print_error, print_status
 
 
 # This function will test to see if a memory address is in the range of memory provided in the simulator(0000-7FFF).
@@ -57,7 +54,7 @@ def create_indexed_address(memory_address_hex_string, REGISTER_DICT):
     return memory_address_hex_string
 
 
-def execute_operation(REGISTER_DICT, MEMORY_MODEL):
+def execute_operation(simulator_panel, REGISTER_DICT, MEMORY_MODEL):
     # PROGRAM COUNTER
     pc_register_dec_value = hex_string_to_dec(REGISTER_DICT[REGISTER_PC].get_hex_string())
 
@@ -66,7 +63,8 @@ def execute_operation(REGISTER_DICT, MEMORY_MODEL):
     try:
         opcode_hex_string = MEMORY_MODEL.get_byte(pc_register_dec_value)
     except SICMemoryModelError:
-        print_error("MEMORY FAULT: Halting program execution\n")
+        error_message = "MEMORY FAULT: Halting program execution"
+        simulator_panel.display_error_dialog(error_message)
         continue_execution = False
         return continue_execution
 
@@ -74,8 +72,8 @@ def execute_operation(REGISTER_DICT, MEMORY_MODEL):
 
     # Verify that the opcode is supported by the simulator.
     if opcode_mnemonic is None:
-        print_error("UNRECOGNIZED OPCODE FAULT: Halting program execution",
-                    "OPCODE: " + opcode_hex_string + "\n")
+        error_message = "UNRECOGNIZED OPCODE FAULT: Halting program execution\n" + "OPCODE: " + opcode_hex_string
+        simulator_panel.display_error_dialog(error_message)
         continue_execution = False
         return continue_execution
 
@@ -84,7 +82,8 @@ def execute_operation(REGISTER_DICT, MEMORY_MODEL):
     try:
         memory_address_hex_string = MEMORY_MODEL.get_bytes(pc_register_dec_value + 1, 2)
     except SICMemoryModelError:
-        print_error("MEMORY FAULT: Halting program execution\n")
+        error_message = "MEMORY FAULT: Halting program execution"
+        simulator_panel.display_error_dialog(error_message)
         continue_execution = False
         return continue_execution
 
@@ -101,8 +100,9 @@ def execute_operation(REGISTER_DICT, MEMORY_MODEL):
 
     # Verify that the PC register holds an in-range memory address
     if not test_for_hex_memory_address_in_range(REGISTER_DICT[REGISTER_PC].get_hex_string()):
-        print_error("PROGRAM COUNTER FAULT: Halting program execution",
-                    "PC REGISTER: " + REGISTER_DICT[REGISTER_PC].get_hex_string() + "\n")
+        error_message = ("PROGRAM COUNTER FAULT: Halting program execution\n" +
+                         "PC REGISTER: " + REGISTER_DICT[REGISTER_PC].get_hex_string())
+        simulator_panel.display_error_dialog(error_message)
         continue_execution = False
         return continue_execution
 
@@ -117,7 +117,8 @@ def execute_operation(REGISTER_DICT, MEMORY_MODEL):
             try:
                 word_hex_string = MEMORY_MODEL.get_bytes(memory_address_dec_value, BYTES_IN_WORD)
             except SICMemoryModelError:
-                print_error("MEMORY FAULT: Halting program execution\n")
+                error_message = "MEMORY FAULT: Halting program execution"
+                simulator_panel.display_error_dialog(error_message)
                 continue_execution = False
                 return continue_execution
 
@@ -127,7 +128,8 @@ def execute_operation(REGISTER_DICT, MEMORY_MODEL):
             sum_dec_value = register_a_dec_value + word_dec_value
 
             if not MINIMUM_INTEGER <= sum_dec_value <= MAXIMUM_INTEGER:
-                print_error("INTEGER OUT OF RANGE: Halting program execution\n")
+                error_message = "INTEGER OUT OF RANGE: Halting program execution"
+                simulator_panel.display_error_dialog(error_message)
                 continue_execution = False
                 return continue_execution
 
@@ -143,7 +145,8 @@ def execute_operation(REGISTER_DICT, MEMORY_MODEL):
             try:
                 word_hex_string = MEMORY_MODEL.get_bytes(memory_address_dec_value, BYTES_IN_WORD)
             except SICMemoryModelError:
-                print_error("MEMORY FAULT: Halting program execution\n")
+                error_message = "MEMORY FAULT: Halting program execution"
+                simulator_panel.display_error_dialog(error_message)
                 continue_execution = False
                 return continue_execution
             # Convert hex string to bin string
@@ -172,7 +175,8 @@ def execute_operation(REGISTER_DICT, MEMORY_MODEL):
                 memory_value_hex_string = MEMORY_MODEL.get_bytes(memory_address_dec_value, 3)
                 memory_value_dec_value = sic_integer.hex_string_to_dec(memory_value_hex_string)
             except SICMemoryModelError:
-                print_error("MEMORY FAULT: Halting program execution\n")
+                error_message = "MEMORY FAULT: Halting program execution"
+                simulator_panel.display_error_dialog(error_message)
                 continue_execution = False
                 return continue_execution
             # Set status word register based on the comparison
@@ -194,7 +198,8 @@ def execute_operation(REGISTER_DICT, MEMORY_MODEL):
             try:
                 word_hex_string = MEMORY_MODEL.get_bytes(memory_address_dec_value, BYTES_IN_WORD)
             except SICMemoryModelError:
-                print_error("MEMORY FAULT: Halting program execution\n")
+                error_message = "MEMORY FAULT: Halting program execution"
+                simulator_panel.display_error_dialog(error_message)
                 continue_execution = False
                 return continue_execution
 
@@ -202,14 +207,16 @@ def execute_operation(REGISTER_DICT, MEMORY_MODEL):
             word_dec_value = sic_integer.hex_string_to_dec(word_hex_string)
 
             if word_dec_value == 0:
-                print_error("DIVISION BY ZERO FAULT: Halting program execution\n")
+                error_message = "DIVISION BY ZERO FAULT: Halting program execution"
+                simulator_panel.display_error_dialog(error_message)
                 continue_execution = False
                 return continue_execution
 
             quotient_dec_value = register_a_dec_value // word_dec_value
 
             if not MINIMUM_INTEGER <= quotient_dec_value <= MAXIMUM_INTEGER:
-                print_error("INTEGER OUT OF RANGE FAULT: Halting program execution\n")
+                error_message = "INTEGER OUT OF RANGE FAULT: Halting program execution"
+                simulator_panel.display_error_dialog(error_message)
                 continue_execution = False
                 return continue_execution
 
@@ -266,7 +273,8 @@ def execute_operation(REGISTER_DICT, MEMORY_MODEL):
             try:
                 word_hex_string = MEMORY_MODEL.get_bytes(memory_address_dec_value, BYTES_IN_WORD)
             except SICMemoryModelError:
-                print_error("MEMORY FAULT: Halting program execution\n")
+                error_message = "MEMORY FAULT: Halting program execution"
+                simulator_panel.display_error_dialog(error_message)
                 continue_execution = False
                 return continue_execution
 
@@ -281,7 +289,8 @@ def execute_operation(REGISTER_DICT, MEMORY_MODEL):
             try:
                 byte_string = MEMORY_MODEL.get_byte(memory_address_dec_value)
             except SICMemoryModelError:
-                print_error("MEMORY FAULT: Halting program execution\n")
+                error_message = "MEMORY FAULT: Halting program execution"
+                simulator_panel.display_error_dialog(error_message)
                 continue_execution = False
                 return continue_execution
 
@@ -298,7 +307,8 @@ def execute_operation(REGISTER_DICT, MEMORY_MODEL):
             try:
                 word_hex_string = MEMORY_MODEL.get_bytes(memory_address_dec_value, BYTES_IN_WORD)
             except SICMemoryModelError:
-                print_error("MEMORY FAULT: Halting program execution\n")
+                error_message = "MEMORY FAULT: Halting program execution"
+                simulator_panel.display_error_dialog(error_message)
                 continue_execution = False
                 return continue_execution
 
@@ -312,7 +322,8 @@ def execute_operation(REGISTER_DICT, MEMORY_MODEL):
             try:
                 word_hex_string = MEMORY_MODEL.get_bytes(memory_address_dec_value, BYTES_IN_WORD)
             except SICMemoryModelError:
-                print_error("MEMORY FAULT: Halting program execution\n")
+                error_message = "MEMORY FAULT: Halting program execution"
+                simulator_panel.display_error_dialog(error_message)
                 continue_execution = False
                 return continue_execution
 
@@ -329,7 +340,8 @@ def execute_operation(REGISTER_DICT, MEMORY_MODEL):
             try:
                 word_hex_string = MEMORY_MODEL.get_bytes(memory_address_dec_value, BYTES_IN_WORD)
             except SICMemoryModelError:
-                print_error("MEMORY FAULT: Halting program execution\n")
+                error_message = "MEMORY FAULT: Halting program execution"
+                simulator_panel.display_error_dialog(error_message)
                 continue_execution = False
                 return continue_execution
 
@@ -339,7 +351,8 @@ def execute_operation(REGISTER_DICT, MEMORY_MODEL):
             product_dec_value = register_a_dec_value * word_dec_value
 
             if not MINIMUM_INTEGER <= product_dec_value <= MAXIMUM_INTEGER:
-                print_error("INTEGER OUT OF RANGE: Halting program execution\n")
+                error_message = "INTEGER OUT OF RANGE: Halting program execution"
+                simulator_panel.display_error_dialog(error_message)
                 continue_execution = False
                 return continue_execution
 
@@ -355,7 +368,8 @@ def execute_operation(REGISTER_DICT, MEMORY_MODEL):
             try:
                 word_hex_string = MEMORY_MODEL.get_bytes(memory_address_dec_value, BYTES_IN_WORD)
             except SICMemoryModelError:
-                print_error("MEMORY FAULT: Halting program execution\n")
+                error_message = "MEMORY FAULT: Halting program execution"
+                simulator_panel.display_error_dialog(error_message)
                 continue_execution = False
                 return continue_execution
             # Convert hex string to bin string
@@ -397,8 +411,9 @@ def execute_operation(REGISTER_DICT, MEMORY_MODEL):
             REGISTER_DICT[REGISTER_PC].set_hex_string(register_l_hex_string)
 
             if not test_for_hex_memory_address_in_range(REGISTER_DICT[REGISTER_PC].get_hex_string()):
-                print_error("PROGRAM COUNTER FAULT: Halting program execution",
-                            "PC REGISTER: " + REGISTER_DICT[REGISTER_PC].get_hex_string() + "\n")
+                error_message = ("PROGRAM COUNTER FAULT: Halting program execution\n" +
+                                 "PC REGISTER: " + REGISTER_DICT[REGISTER_PC].get_hex_string())
+                simulator_panel.display_error_dialog(error_message)
                 continue_execution = False
                 return continue_execution
 
@@ -416,7 +431,8 @@ def execute_operation(REGISTER_DICT, MEMORY_MODEL):
                     MEMORY_MODEL.set_byte(memory_address_dec_value + index,
                                           register_a_hex_string[start_index:end_index])
                 except SICMemoryModelError:
-                    print_error("MEMORY FAULT: Halting program execution\n")
+                    error_message = "MEMORY FAULT: Halting program execution"
+                    simulator_panel.display_error_dialog(error_message)
                     continue_execution = False
                     return continue_execution
                 index += 1
@@ -433,7 +449,8 @@ def execute_operation(REGISTER_DICT, MEMORY_MODEL):
             try:
                 MEMORY_MODEL.set_byte(memory_address_dec_value, byte_string)
             except SICMemoryModelError:
-                print_error("MEMORY FAULT: Halting program execution\n")
+                error_message = "MEMORY FAULT: Halting program execution"
+                simulator_panel.display_error_dialog(error_message)
                 continue_execution = False
                 return continue_execution
 
@@ -452,7 +469,8 @@ def execute_operation(REGISTER_DICT, MEMORY_MODEL):
                     MEMORY_MODEL.set_byte(memory_address_dec_value + index,
                                           register_l_hex_string[start_index:end_index])
                 except SICMemoryModelError:
-                    print_error("MEMORY FAULT: Halting program execution\n")
+                    error_message = "MEMORY FAULT: Halting program execution"
+                    simulator_panel.display_error_dialog(error_message)
                     continue_execution = False
                     return continue_execution
                 index += 1
@@ -473,7 +491,8 @@ def execute_operation(REGISTER_DICT, MEMORY_MODEL):
                     MEMORY_MODEL.set_byte(memory_address_dec_value + index,
                                           register_sw_hex_string[start_index:end_index])
                 except SICMemoryModelError:
-                    print_error("MEMORY FAULT: Halting program execution\n")
+                    error_message = "MEMORY FAULT: Halting program execution"
+                    simulator_panel.display_error_dialog(error_message)
                     continue_execution = False
                     return continue_execution
                 index += 1
@@ -494,7 +513,8 @@ def execute_operation(REGISTER_DICT, MEMORY_MODEL):
                     MEMORY_MODEL.set_byte(memory_address_dec_value + index,
                                           register_x_hex_string[start_index:end_index])
                 except SICMemoryModelError:
-                    print_error("MEMORY FAULT: Halting program execution\n")
+                    error_message = "MEMORY FAULT: Halting program execution"
+                    simulator_panel.display_error_dialog(error_message)
                     continue_execution = False
                     return continue_execution
                 index += 1
@@ -512,7 +532,8 @@ def execute_operation(REGISTER_DICT, MEMORY_MODEL):
             try:
                 word_hex_string = MEMORY_MODEL.get_bytes(memory_address_dec_value, BYTES_IN_WORD)
             except SICMemoryModelError:
-                print_error("MEMORY FAULT: Halting program execution\n")
+                error_message = "MEMORY FAULT: Halting program execution"
+                simulator_panel.display_error_dialog(error_message)
                 continue_execution = False
                 return continue_execution
 
@@ -522,7 +543,8 @@ def execute_operation(REGISTER_DICT, MEMORY_MODEL):
             difference_dec_value = register_a_dec_value - word_dec_value
 
             if not MINIMUM_INTEGER <= difference_dec_value <= MAXIMUM_INTEGER:
-                print_error("INTEGER OUT OF RANGE: Halting program execution\n")
+                error_message = "INTEGER OUT OF RANGE: Halting program execution"
+                simulator_panel.display_error_dialog(error_message)
                 continue_execution = False
                 return continue_execution
 
@@ -536,7 +558,8 @@ def execute_operation(REGISTER_DICT, MEMORY_MODEL):
             try:
                 byte_string = MEMORY_MODEL.get_byte(memory_address_dec_value)
             except SICMemoryModelError:
-                print_error("MEMORY FAULT: Halting program execution\n")
+                error_message = "MEMORY FAULT: Halting program execution"
+                simulator_panel.display_error_dialog(error_message)
                 continue_execution = False
                 return continue_execution
 
@@ -546,7 +569,8 @@ def execute_operation(REGISTER_DICT, MEMORY_MODEL):
                 case "F1":
                     test_device_response_hex_string = test_input_device_F1()
                 case _:
-                    print_error("PERIPHERAL DEVICE FAULT: Halting program execution\n")
+                    error_message = "PERIPHERAL DEVICE FAULT: Halting program execution"
+                    simulator_panel.display_error_dialog(error_message)
                     continue_execution = False
                     return continue_execution
 
@@ -566,7 +590,8 @@ def execute_operation(REGISTER_DICT, MEMORY_MODEL):
                 memory_value_hex_string = MEMORY_MODEL.get_bytes(memory_address_dec_value, 3)
                 memory_value_dec_value = sic_integer.hex_string_to_dec(memory_value_hex_string)
             except SICMemoryModelError:
-                print_error("MEMORY FAULT: Halting program execution\n")
+                error_message = "MEMORY FAULT: Halting program execution"
+                simulator_panel.display_error_dialog(error_message)
                 continue_execution = False
                 return continue_execution
             # Set status word register based on the comparison
@@ -591,7 +616,8 @@ def execute_operation(REGISTER_DICT, MEMORY_MODEL):
                 memory_value_hex_string = MEMORY_MODEL.get_bytes(memory_address_dec_value, 3)
                 memory_value_dec_value = sic_integer.hex_string_to_dec(memory_value_hex_string)
             except SICMemoryModelError:
-                print_error("MEMORY FAULT: Halting program execution\n")
+                error_message = "MEMORY FAULT: Halting program execution"
+                simulator_panel.display_error_dialog(error_message)
                 continue_execution = False
                 return continue_execution
             # Set status word register based on the comparison
@@ -616,7 +642,8 @@ def execute_operation(REGISTER_DICT, MEMORY_MODEL):
                 memory_value_hex_string = MEMORY_MODEL.get_bytes(memory_address_dec_value, 3)
                 memory_value_dec_value = sic_integer.hex_string_to_dec(memory_value_hex_string) * 3
             except SICMemoryModelError:
-                print_error("MEMORY FAULT: Halting program execution\n")
+                error_message = "MEMORY FAULT: Halting program execution"
+                simulator_panel.display_error_dialog(error_message)
                 continue_execution = False
                 return continue_execution
             # Set status word register based on the comparison
@@ -639,6 +666,7 @@ def execute_operation(REGISTER_DICT, MEMORY_MODEL):
             return continue_execution
         case "XOS":
             # End processing and exit to the operating system
-            print_status("Program execution terminated normally\n")
+            status_message = "Program execution terminated normally"
+            simulator_panel.display_status_dialog(status_message)
             continue_execution = False
             return continue_execution

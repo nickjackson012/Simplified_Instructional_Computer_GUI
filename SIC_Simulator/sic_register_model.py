@@ -134,7 +134,7 @@ def dump_registers():
                           "   HEX [" + register.get_formatted_hex_string() + "]" +
                           "   BIN [" + register.get_formatted_bin_string() + "]\n")
 
-    print(output_string)
+    return output_string
 
 
 def initialize_registers():

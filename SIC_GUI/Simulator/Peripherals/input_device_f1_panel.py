@@ -13,18 +13,22 @@ class InputDeviceF1Panel(wx.Panel):
         grid_bag_sizer = wx.GridBagSizer(hgap=10, vgap=10)
 
         # PANELS
-        input_panel = InputPanel(self)
+        self.input_panel = InputPanel(self)
 
         # CONTROLS
         lbl_info = wx.StaticText(self, label="Input one character and press Enter")
         btn_end_of_file = wx.Button(self, label="End of File")
+        btn_end_of_file.SetToolTip("Click to input an end of file character")
         btn_end_of_record = wx.Button(self, label="End of Record")
+        btn_end_of_record.SetToolTip("Click to input an end of record character")
         btn_enter = wx.Button(self, label="Enter")
+        btn_enter.SetToolTip("Click to input character")
         btn_newline = wx.Button(self, label="Newline")
+        btn_newline.SetToolTip("Click to input a newline character")
 
         # LAYOUT
-        grid_bag_sizer.Add(lbl_info, pos=(0, 0), span=(0, 4), flag=wx.ALIGN_LEFT | wx.EXPAND)
-        grid_bag_sizer.Add(input_panel, pos=(1, 0), span=(0, 4), flag=wx.EXPAND)
+        grid_bag_sizer.Add(lbl_info, pos=(0, 0), span=(1, 4), flag=wx.ALIGN_LEFT | wx.EXPAND)
+        grid_bag_sizer.Add(self.input_panel, pos=(1, 0), span=(1, 4), flag=wx.EXPAND)
         grid_bag_sizer.Add(btn_end_of_file, pos=(2, 0))
         grid_bag_sizer.Add(btn_end_of_record, pos=(2, 1))
         grid_bag_sizer.Add(btn_newline, pos=(2, 2))
@@ -43,3 +47,27 @@ class InputDeviceF1Panel(wx.Panel):
         vertical_box_sizer.Add(static_box_sizer, proportion=0, flag=wx.EXPAND)
 
         self.SetSizer(vertical_box_sizer)
+
+    def initialize_input_device_f1(self):
+        self.input_panel.initialize()
+
+    # def button_handler(self, event):
+    #     button_label = event.GetEventObject().GetLabel()
+    #
+    #     match button_label:
+    #         case "End of File":
+    #             self.input_panel.txt_input.Clear()
+    #             self.input_panel.txt_input.WriteText("EOF")
+    #             # wx.MessageBox("End of File Button Clicked", "Button Clicked Notice", wx.OK | wx.ICON_INFORMATION)
+    #         case "End of Record":
+    #             self.input_panel.txt_input.Clear()
+    #             self.input_panel.txt_input.WriteText("EOR")
+    #             # wx.MessageBox("End of Record Button Clicked", "Button Clicked Notice", wx.OK | wx.ICON_INFORMATION)
+    #         case "Newline":
+    #             self.input_panel.txt_input.Clear()
+    #             self.input_panel.txt_input.WriteText("\\n")
+    #             # wx.MessageBox("Newline Button Clicked", "Button Clicked Notice", wx.OK | wx.ICON_INFORMATION)
+    #         case "Enter":
+    #             self.input_panel.txt_input.Clear()
+    #             # wx.MessageBox("Enter Button Clicked", "Button Clicked Notice", wx.OK | wx.ICON_INFORMATION)
+

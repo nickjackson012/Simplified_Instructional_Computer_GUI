@@ -11,9 +11,10 @@ class AssemblyListingPanel(wx.Panel):
         vertical_box_sizer = wx.BoxSizer(wx.VERTICAL)
 
         # CONTROLS
+        MONOSPACED_FONT = wx.Font(12, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')
+
         self.txt_assembly_listing = wx.TextCtrl(self, style=wx.TE_READONLY | wx.TE_MULTILINE)
-        monospaced_font = wx.Font(14, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')
-        self.txt_assembly_listing.SetFont(monospaced_font)
+        self.txt_assembly_listing.SetFont(MONOSPACED_FONT)
 
         # LAYOUT
         vertical_box_sizer.Add(self.txt_assembly_listing, proportion=1, flag=wx.EXPAND | wx.ALL, border=20)

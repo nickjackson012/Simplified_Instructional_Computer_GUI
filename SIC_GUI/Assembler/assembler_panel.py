@@ -13,7 +13,7 @@ class AssemblerPanel(wx.Panel):
     def __init__(self, parent):
         super(AssemblerPanel, self).__init__(parent)
 
-        self.disable_file_context_tabs = True
+        self.enable_file_context_tabs = False
 
         self.SetBackgroundColour("light gray")
 
@@ -35,8 +35,6 @@ class AssemblerPanel(wx.Panel):
         self.tab_object_code = ObjectCodePanel(self.notebook_assembler)
         self.notebook_assembler.AddPage(self.tab_object_code, "Object Code")
 
-        self.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGING, self.notebook_tab_handler)
-
         # LAYOUT
         vertical_box_sizer.Add(self.control_panel, proportion=0, flag=wx.EXPAND | wx.ALL, border=20)
         vertical_box_sizer.Add(self.notebook_assembler, proportion=1, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM,
@@ -45,6 +43,7 @@ class AssemblerPanel(wx.Panel):
         self.SetSizer(vertical_box_sizer)
 
         # EVENT HANDLING
+        self.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGING, self.notebook_tab_handler)
         self.Bind(wx.EVT_BUTTON, self.button_handler)
         self.Bind(wx.EVT_FILEPICKER_CHANGED, self.file_picker_changed_handler)
 
@@ -60,7 +59,7 @@ class AssemblerPanel(wx.Panel):
         tab = event.GetEventObject()
         tab_number = tab.GetSelection()
         if tab.GetPageText(tab_number) == "Assembly Status":
-            if self.disable_file_context_tabs:
+            if not self.enable_file_context_tabs:
                 event.Veto()
 
     def button_handler(self, event):
@@ -82,7 +81,7 @@ class AssemblerPanel(wx.Panel):
             object_code_file_path = program_file_path.replace(".asm", ".obj")
             self.tab_object_code.load_object_code_file(object_code_file_path)
 
-            self.disable_file_context_tabs = False
+            self.enable_file_context_tabs = True
         except (SICAssemblyParserError, SICAssemblerError) as ex:
             # ERROR
             print_error(str(ex))
