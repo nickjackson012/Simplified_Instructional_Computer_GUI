@@ -22,9 +22,6 @@ def test_output_device_05():
 
 def write_byte_to_output_device_05(byte_string: str):
     global OUTPUT_DEVICE_05_INTERFACE
-    TEXT_COLOR_CYAN = "\033[96m"
-    TEXT_COLOR_DEFAULT = "\033[0m"
-
     OUTPUT_DEVICE_05_INTERFACE += chr(hex_string_to_dec(byte_string))
+    return OUTPUT_DEVICE_05_INTERFACE
 
-    print(TEXT_COLOR_CYAN + "OUTPUT DEVICE>\n" + OUTPUT_DEVICE_05_INTERFACE + "\n" + TEXT_COLOR_DEFAULT)

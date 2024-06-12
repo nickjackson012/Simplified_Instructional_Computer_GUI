@@ -8,6 +8,8 @@ from SIC_Utilities.sic_constants import HEX_TO_OPCODE_DICT, BYTES_IN_WORD, \
     MINIMUM_INTEGER, SW_LESS_THAN, SW_EQUAL, SW_GREATER_THAN, BITS_IN_WORD
 from SIC_Utilities.sic_converter import hex_string_to_dec, dec_to_hex_string, hex_word_to_bin_word
 
+OUTPUT_DEVICE_05_INTERFACE = ""
+
 
 # This function will test to see if a memory address is in the range of memory provided in the simulator(0000-7FFF).
 def test_for_hex_memory_address_in_range(memory_address_hex_string):
@@ -397,7 +399,7 @@ def execute_operation(simulator_panel, REGISTER_DICT, MEMORY_MODEL):
             if register_a_hex_string == "000000" and register_x_hex_string == "000000":
                 is_in_EOF_state = True
 
-            byte_string = read_byte_input_device_F1(is_in_EOF_state)
+            byte_string = simulator_panel.read_byte_input_device_F1(is_in_EOF_state)
 
             register_a_hex_string = register_a_hex_string[:4] + byte_string
 
@@ -660,7 +662,8 @@ def execute_operation(simulator_panel, REGISTER_DICT, MEMORY_MODEL):
             # Device specified by (m) <- (A)[rightmost byte]
             register_a_hex_string = REGISTER_DICT[REGISTER_A].get_hex_string()
             byte_string = register_a_hex_string[4:]
-            write_byte_to_output_device_05(byte_string)
+
+            simulator_panel.write_byte_to_output_device_05(write_byte_to_output_device_05(byte_string))
 
             continue_execution = True
             return continue_execution
