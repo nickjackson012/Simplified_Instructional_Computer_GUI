@@ -6,7 +6,10 @@ from SIC_GUI.Simulator.simulator_panel import SimulatorPanel
 
 class SICGUIFrame(wx.Frame):
     def __init__(self, parent, title):
-        super(SICGUIFrame, self).__init__(parent, title=title, size=(1100, 800))
+        super(SICGUIFrame, self).__init__(parent, title=title, size=(1250, 800))
+
+        # wx.ToolTip.Enable(True)
+        # wx.ToolTip.SetAutoPop(7000)
 
         # MENU
         menubar = wx.MenuBar()
