@@ -33,4 +33,4 @@ class LoadStatusPanel(wx.Panel):
     def load_object_code_file(self, object_code_file_path):
         self.txt_load_status.LoadFile(object_code_file_path)
         self.txt_load_status.AppendText("\nObject Code File Ready\n")
-        self.txt_load_status.AppendText("Click the Load button to load object code into memory and enable Run Program and Peripherals tab\n")
+        self.txt_load_status.AppendText("Click the Load button to load object code into memory and enable Run Program tab\n")

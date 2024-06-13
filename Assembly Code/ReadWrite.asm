@@ -1,6 +1,7 @@
-. Example assembly code from pg. 45
-. Chapter 2
-. Used to exercise the SIC Assembler and the SIC Simulator
+. Based on example assembly code
+. from chapter 2 page 45
+. Used to exercise the SIC Assembler
+. and the SIC Simulator
 .LABEL	OPCODE	OPERAND		REMARKS
 COPY	START	1000			COPY FILE FROM INPUT TO OUTPUT
 FIRST	STL		RETADR			SAVE RETURN ADDRESS
